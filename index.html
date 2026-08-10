@@ -598,6 +598,15 @@ const regulasiData = [
   }
 ];
 
+function getDownloadUrl(url){
+  if(!url || url === "#") return "#";
+  // Google Drive: ubah link /file/d/ID/view menjadi link unduh langsung.
+  const match = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+  if(match) return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+  // Jika sudah berupa URL uc?export=download, biarkan apa adanya.
+  return url;
+}
+
 function renderRegulasi(filter){
   const list = document.getElementById('regulasi-list');
   const data = filter ? regulasiData.filter(d => d.kategori === filter) : regulasiData;
@@ -609,7 +618,7 @@ function renderRegulasi(filter){
         <div class="doc-meta">${d.tanggal} · ${d.format}</div>
       </div>
       <span class="tag ${d.warna}">${d.kategori}</span>
-      <a class="dl-btn" href="${d.link}" target="_blank" rel="noopener">Unduh</a>
+      ${d.link && d.link !== "#" ? `<a class="dl-btn" href="${getDownloadUrl(d.link)}" target="_blank" rel="noopener" download>Unduh</a>` : `<span class="dl-btn" style="opacity:.5;cursor:not-allowed;">Belum tersedia</span>`}
     </div>
   `).join('') || '<div class="doc-row" style="grid-template-columns:1fr;color:#7a8288;">Belum ada dokumen pada kategori ini.</div>';
 }
@@ -713,6 +722,14 @@ renderRegulasi();
    ====================================================== */
 const beritaData = [
   {
+    judul: "Tim Verifikasi Kecamatan Nagreg Laksanakan Musyawarah Validasi dan Verifikasi Indeks Desa 2026",
+    desa: "Kecamatan Nagreg",
+    tanggal: "10 Agustus 2026",
+    ringkas: "Tim Verifikasi Kecamatan Nagreg melaksanakan musyawarah tingkat kecamatan dalam rangka validasi dan verifikasi Indeks Desa Tahun 2026 untuk memastikan data yang diinput sesuai dengan kondisi faktual di lapangan.",
+    isi: `Nagreg, 10 Agustus 2026 — Tim Verifikasi Kecamatan Nagreg melaksanakan musyawarah tingkat kecamatan dalam rangka validasi dan verifikasi Indeks Desa Tahun 2026. Kegiatan ini menjadi salah satu tahapan penting untuk memastikan data yang diinput oleh masing-masing desa sesuai dengan kondisi faktual di lapangan.\n\nKegiatan tersebut dihadiri oleh Tim Input Tingkat Desa dari desa-desa se-Kecamatan Nagreg serta Tim Verifikasi Kecamatan. Dalam musyawarah, dilakukan pencermatan, pembahasan, dan klarifikasi terhadap data serta indikator yang menjadi bagian dari Indeks Desa.\n\nSekretaris Kecamatan Nagreg, Lusianto, dalam arahannya menyampaikan harapan agar seluruh data yang diinput benar-benar menggambarkan kondisi yang sebenarnya.\n\n“Data yang diinput harus sesuai dengan fakta di lapangan, jangan diada-adakan. Kita berharap data yang disampaikan benar-benar objektif dan dapat dipertanggungjawabkan,” ungkap Lusianto.\n\nMenurutnya, Indeks Desa diharapkan tidak hanya menjadi sebuah angka atau hasil pendataan semata, tetapi dapat menjadi patokan dan pegangan dalam upaya pembangunan desa. Data yang akurat akan membantu pemerintah dalam melihat kondisi dan kebutuhan desa secara lebih objektif sehingga perencanaan pembangunan dapat dilakukan secara lebih tepat sasaran.\n\nMelalui proses validasi dan verifikasi ini, diharapkan seluruh data Indeks Desa di Kecamatan Nagreg memiliki kualitas yang baik, akurat, dan sesuai dengan kondisi riil masing-masing desa.\n\nKolaborasi antara Tim Input Desa dan Tim Verifikasi Kecamatan menjadi bagian penting untuk memastikan proses pendataan berjalan secara objektif, transparan, dan akuntabel.\n\nDengan tersedianya data yang valid, Indeks Desa diharapkan dapat menjadi dasar dalam menentukan arah pembangunan dan menjadi cermin perkembangan desa dari waktu ke waktu.\n\n📍 Kecamatan Nagreg, Kabupaten Bandung\n📅 Senin, 10 Agustus 2026\n📸 Dokumentasi: TPP Kecamatan Nagreg`,
+    foto: ""
+  },
+  {
     judul: "TPP Kecamatan Nagreg Dampingi Monitoring dan Evaluasi APBDes Tahun Anggaran 2025 Desa Ganjar Sabar",
     desa: "Desa Ganjar Sabar",
     tanggal: "31 Juli 2026",
@@ -730,10 +747,28 @@ const beritaData = [
   }
 ];
 
+function makeNewsSlug(b){
+  return (b.judul + "-" + b.tanggal)
+    .toLowerCase()
+    .normalize("NFD").replace(/[\\u0300-\\u036f]/g,"")
+    .replace(/[^a-z0-9]+/g,"-")
+    .replace(/^-+|-+$/g,"");
+}
+
+function getNewsUrl(b){
+  const url = new URL(window.location.href);
+  url.hash = "";
+  url.search = "";
+  url.searchParams.set("berita", makeNewsSlug(b));
+  return url.href;
+}
+
 function renderBerita(){
   const list = document.getElementById('berita-list');
-  list.innerHTML = beritaData.map((b, i) => `
-    <article class="news-card">
+  list.innerHTML = beritaData.map((b, i) => {
+    const slug = makeNewsSlug(b);
+    return `
+    <article class="news-card" id="berita-${slug}" data-news-slug="${slug}">
       <div class="news-thumb${b.foto ? ' has-photo' : ''}" ${b.foto ? `style="padding:0;"` : ''}>
         ${b.foto ? `<img src="https://lh3.googleusercontent.com/d/${b.foto}" alt="${b.judul}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">` : `<span>${b.desa}</span>`}
       </div>
@@ -748,14 +783,38 @@ function renderBerita(){
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
             <span class="like-label">Suka</span> <span class="like-count">0</span>
           </button>
-          <button type="button" class="share-btn" onclick="shareNews(this)">
+          <button type="button" class="share-btn" onclick="shareNews(this, ${i})" title="Bagikan link berita ini">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.6" y1="10.6" x2="15.4" y2="6.4"></line><line x1="8.6" y1="13.4" x2="15.4" y2="17.6"></line></svg>
             <span class="share-label">Bagikan</span>
           </button>
         </div>
       </div>
     </article>
-  `).join('');
+  `}).join('');
+}
+
+function openNews(i, scroll=true){
+  const b = beritaData[i];
+  if(!b) return;
+  const ringkas = document.getElementById('ringkas-'+i);
+  const full = document.getElementById('full-'+i);
+  const read = document.querySelector(`#berita-${makeNewsSlug(b)} .read`);
+  if(ringkas && full){
+    ringkas.style.display = 'none';
+    full.style.display = 'block';
+    if(read) read.textContent = 'Tutup ↑';
+  }
+  if(scroll){
+    document.getElementById('berita-'+makeNewsSlug(b))?.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+}
+
+function setNewsUrl(i){
+  const url = new URL(window.location.href);
+  url.hash = "";
+  url.search = "";
+  url.searchParams.set("berita", makeNewsSlug(beritaData[i]));
+  history.replaceState(null, "", url.href);
 }
 
 function toggleBerita(i, el){
@@ -765,9 +824,63 @@ function toggleBerita(i, el){
   full.style.display = showingFull ? 'none' : 'block';
   ringkas.style.display = showingFull ? 'block' : 'none';
   el.textContent = showingFull ? 'Baca selengkapnya →' : 'Tutup ↑';
+  if(!showingFull) setNewsUrl(i);
+}
+
+function copyText(text){
+  if(navigator.clipboard && window.isSecureContext){
+    return navigator.clipboard.writeText(text);
+  }
+  const ta=document.createElement('textarea');
+  ta.value=text;
+  ta.style.position='fixed';
+  ta.style.opacity='0';
+  document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand('copy'); } finally { ta.remove(); }
+  return Promise.resolve();
+}
+
+function shareNews(btn, i){
+  const b = beritaData[i];
+  const url = getNewsUrl(b);
+  const title = b.judul;
+  const text = `${title} — ${b.desa}, ${b.tanggal}`;
+
+  // Pastikan berita terbuka dan URL unik sudah siap dibagikan.
+  openNews(i, false);
+  setNewsUrl(i);
+
+  if(navigator.share){
+    navigator.share({title, text, url}).catch(()=>{});
+    return;
+  }
+
+  copyText(url).then(()=>{
+    const label = btn.querySelector('.share-label');
+    const prevText = label.textContent;
+    btn.classList.add('shared');
+    label.textContent = 'Link tersalin!';
+    setTimeout(()=>{
+      btn.classList.remove('shared');
+      label.textContent = prevText;
+    }, 2200);
+  }).catch(()=>{
+    window.prompt('Salin link berita ini:', url);
+  });
+}
+
+function openSharedNews(){
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('berita');
+  if(!slug) return;
+  const i = beritaData.findIndex(b => makeNewsSlug(b) === slug);
+  if(i === -1) return;
+  setTimeout(()=>openNews(i, true), 250);
 }
 
 renderBerita();
+openSharedNews();
 </script>
 
 <!-- ================= FOTO KEGIATAN ================= -->
@@ -940,26 +1053,6 @@ renderBerita();
     btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
   }
 
-  // ---------- SHARE BUTTON ----------
-  function shareNews(btn){
-    const card = btn.closest('.news-card');
-    const title = card.querySelector('h3') ? card.querySelector('h3').textContent.trim() : document.title;
-    const shareData = { title: title, text: title, url: window.location.href };
-
-    if (navigator.share) {
-      navigator.share(shareData).catch(()=>{});
-    } else if (navigator.clipboard) {
-      navigator.clipboard.writeText(shareData.url).then(()=>{
-        const label = btn.querySelector('.share-label');
-        const prevText = label.textContent;
-        btn.classList.add('shared');
-        label.textContent = 'Tersalin!';
-        setTimeout(()=>{ btn.classList.remove('shared'); label.textContent = prevText; }, 1800);
-      }).catch(()=>{ alert('Tautan: ' + shareData.url); });
-    } else {
-      alert('Tautan: ' + shareData.url);
-    }
-  }
 </script>
 
 </body>
