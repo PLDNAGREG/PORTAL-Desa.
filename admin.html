@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin - Portal Desa</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial,sans-serif;
+        }
+
+        body{
+            background:linear-gradient(135deg,#0f3d2e,#1e8449);
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+        }
+
+        .login-box{
+            background:white;
+            width:400px;
+            padding:40px;
+            border-radius:20px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1{
+            text-align:center;
+            color:#146c43;
+            margin-bottom:10px;
+        }
+
+        p{
+            text-align:center;
+            color:#777;
+            margin-bottom:30px;
+        }
+
+        input{
+            width:100%;
+            padding:14px;
+            margin-bottom:15px;
+            border:1px solid #ddd;
+            border-radius:10px;
+            font-size:16px;
+        }
+
+        button{
+            width:100%;
+            padding:15px;
+            background:#146c43;
+            color:white;
+            border:none;
+            border-radius:10px;
+            font-size:16px;
+            cursor:pointer;
+        }
+
+        button:hover{
+            background:#0d4d31;
+        }
+
+        #pesan{
+            margin-top:15px;
+            text-align:center;
+            color:red;
+        }
+
+        .back{
+            display:block;
+            text-align:center;
+            margin-top:20px;
+            text-decoration:none;
+            color:#146c43;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+
+    <h1>🏛 Admin Portal Desa</h1>
+
+    <p>Masuk untuk mengelola website</p>
+
+    <input type="email" id="email" placeholder="Email Admin">
+
+    <input type="password" id="password" placeholder="Password">
+
+    <button onclick="loginAdmin()">
+        Login
+    </button>
+
+    <div id="pesan"></div>
+
+    <a class="back" href="index.html">
+        ← Kembali ke Website
+    </a>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+'https://nssrmpypcadjadxquxkx.supabase.co';
+
+const SUPABASE_KEY =
+'sb_publishable_Ga-3oYa9f_jPA-z199-u3Q_Zzu2TyDt';
+
+const supabaseClient =
+supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+async function loginAdmin(){
+
+    const email =
+    document.getElementById('email').value;
+
+    const password =
+    document.getElementById('password').value;
+
+    const {data,error} =
+    await supabaseClient.auth.signInWithPassword({
+        email:email,
+        password:password
+    });
+
+    if(error){
+
+        document.getElementById('pesan').innerHTML =
+        "❌ Email atau password salah";
+
+        return;
+    }
+
+    window.location.href =
+    "dashboard.html";
+}
+
+</script>
+
+</body>
+</html>
