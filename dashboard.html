@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<h1>Dashboard Admin</h1>
+
+<p>Login berhasil</p>
+
+<button onclick="logout()">
+Logout
+</button>
+
+<script>
+
+const SUPABASE_URL =
+'https://nssrmpypcadjadxquxkx.supabase.co';
+
+const SUPABASE_KEY =
+'sb_publishable_Ga-3oYa9f_jPA-z199-u3Q_Zzu2TyDt';
+
+const supabaseClient =
+supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+async function cekLogin(){
+
+    const {
+        data:{session}
+    } = await supabaseClient.auth.getSession();
+
+    if(!session){
+        window.location.href='admin.html';
+    }
+}
+
+async function logout(){
+
+    await supabaseClient.auth.signOut();
+
+    window.location.href='admin.html';
+}
+
+cekLogin();
+
+</script>
+
+</body>
+</html>
