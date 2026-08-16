@@ -164,9 +164,51 @@ function openEditor(id=null){
   const x=id?getRow(id):{};
   editingId=id;
   $("#modalTitle").textContent=(id?"Edit ":"Tambah ")+TYPES[currentType];
-  $("#modalBody").innerHTML=`
-  <form onsubmit="saveContent(event)">
-    <div class="form-grid">
+  const photoField=`
+      <div class="field full"><label>Gambar</label><input id="f_file" type="file" accept="image/*" onchange="previewImage(event)">
+        ${x.image_url?`<img id="prev" class="preview" src="${esc(x.image_url)}">`:`<img id="prev" class="preview" style="display:none">`}
+        <input id="oldimg" type="hidden" value="${esc(x.image_url||"")}">
+      </div>`;
+  let fields;
+  if(currentType==="berita"){
+    fields=`
+      <div class="field"><label>Tanggal</label><input id="f_date" type="date" value="${esc(x.date_text||"")}"></div>
+      <div class="field"><label>Kategori</label><input id="f_cat" value="${esc(x.category||"")}" placeholder="Kegiatan"></div>
+      <div class="field full"><label>Judul</label><input id="f_title" required value="${esc(x.title||"")}" placeholder="Judul berita"></div>
+      <div class="field full"><label>Konten Berita</label><textarea id="f_body" placeholder="Tulis isi berita di sini...">${esc(x.body||"")}</textarea></div>
+      ${photoField}`;
+  }else if(currentType==="dokumentasi"){
+    fields=`
+      <div class="field"><label>Tanggal</label><input id="f_date" type="date" value="${esc(x.date_text||"")}"></div>
+      <div class="field full"><label>Judul</label><input id="f_title" required value="${esc(x.title||"")}" placeholder="Judul dokumentasi"></div>
+      <div class="field full"><label>Keterangan</label><textarea id="f_summary" placeholder="Keterangan singkat...">${esc(x.summary||"")}</textarea></div>
+      <div class="field full"><label>Link Google Drive Foto/Video</label><input id="f_url" type="url" value="${esc(x.external_url||"")}" placeholder="https://drive.google.com/file/d/.../view">
+        <div class="hint">Tempel link Drive foto atau video dokumentasi (set akses "Siapa saja yang memiliki link"). Folder kerja: <a href="${DRIVE_FOLDER_URL}" target="_blank" rel="noopener">buka ↗</a></div>
+      </div>`;
+  }else if(currentType==="potensi"){
+    fields=`
+      <div class="field full"><label>Nama Produk</label><input id="f_title" required value="${esc(x.title||"")}" placeholder="Nama produk"></div>
+      <div class="field"><label>Asal Desa</label><input id="f_village" value="${esc(x.village||"")}" placeholder="Nama desa"></div>
+      <div class="field full"><label>Deskripsi</label><textarea id="f_summary" placeholder="Deskripsi produk...">${esc(x.summary||"")}</textarea></div>
+      ${photoField}`;
+  }else if(currentType==="regulasi"){
+    fields=`
+      <div class="field"><label>Jenis Regulasi</label><input id="f_cat" value="${esc(x.category||"")}" placeholder="Peraturan Menteri Desa"></div>
+      <div class="field"><label>Nomor</label><input id="f_code" value="${esc(x.code||"")}" placeholder="6"></div>
+      <div class="field"><label>Tahun</label><input id="f_date" value="${esc(x.date_text||"")}" placeholder="2014"></div>
+      <div class="field"><label>Dikeluarkan Oleh</label><input id="f_village" value="${esc(x.village||"")}" placeholder="Kementerian Desa"></div>
+      <div class="field full"><label>Tentang</label><input id="f_title" required value="${esc(x.title||"")}" placeholder="Tentang apa regulasi ini"></div>
+      <div class="field full"><label>Link Google Drive</label><input id="f_url" type="url" value="${esc(x.external_url||"")}" placeholder="https://drive.google.com/...">
+        <div class="hint">Folder kerja: <a href="${DRIVE_FOLDER_URL}" target="_blank" rel="noopener">buka folder Drive ↗</a></div>
+      </div>`;
+  }else if(currentType==="template"){
+    fields=`
+      <div class="field full"><label>Nama Template</label><input id="f_title" required value="${esc(x.title||"")}" placeholder="Nama template"></div>
+      <div class="field full"><label>Link Google Drive</label><input id="f_url" type="url" value="${esc(x.external_url||"")}" placeholder="https://drive.google.com/...">
+        <div class="hint">Folder kerja: <a href="${DRIVE_FOLDER_URL}" target="_blank" rel="noopener">buka folder Drive ↗</a></div>
+      </div>`;
+  }else{
+    fields=`
       <div class="field"><label>Kode</label><input id="f_code" value="${esc(x.code||"")}" placeholder="B001"></div>
       <div class="field"><label>Tanggal</label><input id="f_date" type="date" value="${esc(x.date_text||"")}"></div>
       <div class="field full"><label>Judul</label><input id="f_title" required value="${esc(x.title||"")}" placeholder="Judul konten"></div>
@@ -187,7 +229,12 @@ function openEditor(id=null){
       <div class="field"><label>Status</label><select id="f_status">
         <option value="draft" ${x.status==="draft"||!x.status?"selected":""}>Draft</option>
         <option value="published" ${x.status==="published"?"selected":""}>Terbitkan</option>
-      </select></div>
+      </select></div>`;
+  }
+  $("#modalBody").innerHTML=`
+  <form onsubmit="saveContent(event)">
+    <div class="form-grid">
+      ${fields}
     </div>
     <div class="modal-footer"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn primary" type="submit">Simpan</button></div>
   </form>`;
@@ -200,9 +247,10 @@ async function saveContent(e){
   e.preventDefault();
   const saveBtn=e.submitter; saveBtn.disabled=true; saveBtn.textContent="Menyimpan...";
   try{
-    let image=$("#oldimg").value||"";
-    const file=$("#f_file").files[0];
-    const driveVal=$("#f_drive_photo").value.trim();
+    const existing=editingId?getRow(editingId):{};
+    let image=$("#oldimg")?.value||"";
+    const file=$("#f_file")?.files[0];
+    const driveVal=$("#f_drive_photo")?.value.trim();
     if(file){
       const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
       const path=`${currentType}/${crypto.randomUUID()}.${ext}`;
@@ -213,19 +261,28 @@ async function saveContent(e){
       image=driveToDirect(driveVal);
     }
     const obj={
-      code:$("#f_code").value.trim()||null,
+      code:$("#f_code")?.value.trim()||existing.code||null,
       type:currentType,
-      date_text:$("#f_date").value.trim(),
+      date_text:$("#f_date")?.value.trim()||"",
       title:$("#f_title").value.trim(),
-      category:$("#f_cat").value.trim(),
-      village:$("#f_village").value.trim(),
-      summary:$("#f_summary").value.trim(),
-      body:$("#f_body").value.trim(),
-      external_url:$("#f_url").value.trim(),
+      category:$("#f_cat")?.value.trim()||"",
+      village:$("#f_village")?.value.trim()??existing.village??"",
+      summary:$("#f_summary")?.value.trim()??existing.summary??"",
+      body:$("#f_body")?.value.trim()||"",
+      external_url:$("#f_url")?.value.trim()??existing.external_url??"",
       image_url:image,
-      pdf_url:$("#f_pdf").value.trim(),
-      status:$("#f_status").value
+      pdf_url:$("#f_pdf")?.value.trim()??existing.pdf_url??"",
+      status:$("#f_status")?.value||existing.status||"draft"
     };
+    if(currentType==="regulasi"){
+      const nomor=obj.code||"", tahun=obj.date_text||"";
+      obj.summary=[nomor,tahun?("Tahun "+tahun):""].filter(Boolean).join(" ");
+    }
+    if(currentType==="dokumentasi"){
+      const linkVal=$("#f_url")?.value.trim()||existing.external_url||"";
+      obj.external_url=linkVal;
+      obj.image_url=driveToDirect(linkVal)||existing.image_url||"";
+    }
     const q=editingId
       ?await sb.from("portal_content").update(obj).eq("id",editingId)
       :await sb.from("portal_content").insert(obj);
