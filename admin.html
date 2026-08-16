@@ -108,11 +108,19 @@
 
 <script>
 
+// URL project Supabase (sama dengan yang dipakai dashboard.html & index.html)
 const SUPABASE_URL =
 'https://nssrmpypcadjadxquxkx.supabase.co';
 
+// Ini adalah Publishable (anon) Key Supabase — aman ditaruh di kode frontend,
+// BUKAN kode/kunci bucket storage. Bucket foto bernama "portal-images"
+// (diatur di dashboard.html, bukan di file ini).
 const SUPABASE_KEY =
 'sb_publishable_Ga-3oYa9f_jPA-z199-u3Q_Zzu2TyDt';
+
+// Folder Google Drive untuk arsip file admin (referensi, tidak dipakai langsung di sini)
+const DRIVE_FOLDER_URL =
+'https://drive.google.com/drive/u/1/folders/1_Q7sGE1RGLBNHW-EP3g_MeVQWow9idPc';
 
 const supabaseClient =
 supabase.createClient(
