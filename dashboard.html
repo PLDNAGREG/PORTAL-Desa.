@@ -31,7 +31,16 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 <script>
 const SUPABASE_URL="https://nssrmpypcadjadxquxkx.supabase.co";
 const SUPABASE_KEY="sb_publishable_Ga-3oYa9f_jPA-z199-u3Q_Zzu2TyDt";
+const DRIVE_FOLDER_URL="https://drive.google.com/drive/u/1/folders/1_Q7sGE1RGLBNHW-EP3g_MeVQWow9idPc";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+// Ubah link berbagi Google Drive (file/d/ID/view atau ?id=ID) menjadi link foto langsung yang bisa ditampilkan di <img>.
+function driveToDirect(url){
+  if(!url) return url;
+  const m=url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)||url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if(m&&m[1])return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1200`;
+  return url;
+}
 
 const TYPES={
   berita:"Berita Desa",
@@ -57,6 +66,14 @@ async function start(){
   const {data,error}=await sb.auth.getSession();
   if(error||!data.session){location.href="admin.html";return}
   currentUser=data.session.user;
+  if(currentUser.app_metadata?.role!=="admin"){
+    $("#root").innerHTML=`<div class="login" style="background:linear-gradient(135deg,#7b261e,#b12c21)"><div class="login-card">
+      <h1 style="color:#7b261e">Akses ditolak</h1>
+      <p>Akun <b>${esc(currentUser.email)}</b> belum memiliki role <b>admin</b> di Supabase (Authentication → Users → App Metadata → <code>{"role":"admin"}</code>).</p>
+      <button class="btn danger" style="width:100%" onclick="logout()">Keluar</button>
+    </div></div>`;
+    return;
+  }
   renderDashboard();
   loadRows();
 }
@@ -68,6 +85,7 @@ function renderDashboard(){
       <div class="brand">PORTAL DESA <small>Dashboard Admin • Kecamatan Nagreg</small></div>
       <div class="top-actions">
         <span style="font-size:11px;align-self:center">${esc(currentUser.email)}</span>
+        <a class="btn" href="${DRIVE_FOLDER_URL}" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">🗂️ Google Drive</a>
         <button class="btn dark" onclick="goSite()">🌐 Website</button>
         <button class="btn danger" onclick="logout()">Keluar</button>
       </div>
@@ -157,10 +175,13 @@ function openEditor(id=null){
       <div class="field full"><label>Ringkasan / Deskripsi / Nomor</label><textarea id="f_summary" placeholder="Ringkasan singkat...">${esc(x.summary||"")}</textarea></div>
       <div class="field full"><label>Isi berita / isi konten</label><textarea id="f_body" placeholder="Tulis isi konten di sini...">${esc(x.body||"")}</textarea></div>
       <div class="field full"><label>Link Drive / Link eksternal</label><input id="f_url" type="url" value="${esc(x.external_url||"")}" placeholder="https://..."></div>
-      <div class="field full"><label>Foto konten</label><input id="f_file" type="file" accept="image/*" onchange="previewImage(event)">
+      <div class="field full"><label>Link Foto Google Drive (cara utama)</label><input id="f_drive_photo" type="url" placeholder="https://drive.google.com/file/d/.../view">
+        <div class="hint">Di Google Drive: klik kanan foto → <b>Dapatkan link</b> → set akses "Siapa saja yang memiliki link" → tempel di sini. Link otomatis diubah jadi foto langsung. Folder kerja: <a href="${DRIVE_FOLDER_URL}" target="_blank" rel="noopener">buka folder Drive ↗</a></div>
+      </div>
+      <div class="field full"><label>Atau upload langsung (opsional)</label><input id="f_file" type="file" accept="image/*" onchange="previewImage(event)">
         ${x.image_url?`<img id="prev" class="preview" src="${esc(x.image_url)}">`:`<img id="prev" class="preview" style="display:none">`}
         <input id="oldimg" type="hidden" value="${esc(x.image_url||"")}">
-        <div class="hint">Foto akan diunggah ke Supabase Storage bucket <b>portal-images</b>.</div>
+        <div class="hint">Jika diisi, file ini akan diunggah ke Supabase Storage bucket <b>portal-images</b> dan dipakai sebagai foto (mengalahkan link Drive di atas).</div>
       </div>
       <div class="field full"><label>URL PDF (opsional)</label><input id="f_pdf" type="url" value="${esc(x.pdf_url||"")}" placeholder="https://..."></div>
       <div class="field"><label>Status</label><select id="f_status">
@@ -181,12 +202,15 @@ async function saveContent(e){
   try{
     let image=$("#oldimg").value||"";
     const file=$("#f_file").files[0];
+    const driveVal=$("#f_drive_photo").value.trim();
     if(file){
       const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
       const path=`${currentType}/${crypto.randomUUID()}.${ext}`;
       const u=await sb.storage.from("portal-images").upload(path,file,{contentType:file.type,upsert:false});
       if(u.error)throw u.error;
       image=sb.storage.from("portal-images").getPublicUrl(path).data.publicUrl;
+    }else if(driveVal){
+      image=driveToDirect(driveVal);
     }
     const obj={
       code:$("#f_code").value.trim()||null,
