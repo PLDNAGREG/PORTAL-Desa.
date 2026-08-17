@@ -89,8 +89,90 @@ function photo(url,title){
 }
 function view(id){let k="view:"+id;if(!sessionStorage.getItem(k)){local[k]=(local[k]||0)+1;sessionStorage.setItem(k,"1");localStorage.setItem("portalState",JSON.stringify(local))}return local[k]||0}
 function like(id){let k="like:"+id,l="liked:"+id;if(localStorage.getItem(l)){local[k]=Math.max(0,(local[k]||0)-1);localStorage.removeItem(l)}else{local[k]=(local[k]||0)+1;localStorage.setItem(l,"1")}localStorage.setItem("portalState",JSON.stringify(local));return local[k]||0}
-async function copyLink(type,id){let u=new URL(location.href);u.hash=type+"/"+id;try{await navigator.clipboard.writeText(u.href)}catch(e){let a=document.createElement("textarea");a.value=u.href;document.body.appendChild(a);a.select();document.execCommand("copy");a.remove()}toast("Link konten berhasil disalin")}
-function actions(type,id){return `<div class="meta"><span>👁 ${view(id)}</span><button class="${localStorage.getItem("liked:"+id)?"liked":""}" onclick="likeBtn('${id}',this)">♡ <span>${local["like:"+id]||0}</span></button><button onclick="copyLink('${type}','${id}')">⧉ Salin Link</button></div>`}
+function contentUrl(type,id){
+  const u=new URL(location.href);
+  u.hash=type+"/"+id;
+  return u.href;
+}
+async function copyLink(type,id){
+  const u=contentUrl(type,id);
+  try{await navigator.clipboard.writeText(u)}
+  catch(e){
+    const a=document.createElement("textarea");
+    a.value=u;document.body.appendChild(a);a.select();
+    document.execCommand("copy");a.remove();
+  }
+  toast("Link konten berhasil disalin");
+}
+function getShareDescription(x){
+  return String(x?.summary||x?.body||"Portal Desa Smart System TPP Kecamatan Nagreg")
+    .replace(/\s+/g," ").trim().slice(0,180);
+}
+function setMeta(name,content){
+  let el=document.querySelector(`meta[name="${name}"]`);
+  if(!el){el=document.createElement("meta");el.setAttribute("name",name);document.head.appendChild(el)}
+  el.setAttribute("content",content||"");
+}
+function setOG(property,content){
+  let el=document.querySelector(`meta[property="${property}"]`);
+  if(!el){el=document.createElement("meta");el.setAttribute("property",property);document.head.appendChild(el)}
+  el.setAttribute("content",content||"");
+}
+function updateSocialMeta(x,type,id){
+  if(!x)return;
+  const title=x.title||"Portal Desa Smart System TPP Kecamatan Nagreg";
+  const desc=getShareDescription(x);
+  const image=x.image_url||"https://pldnagreg.github.io/PORTAL-Desa/og-image.jpg";
+  const url=contentUrl(type,id);
+  document.title=title+" — Portal Desa";
+  setOG("og:type","article");
+  setOG("og:title",title);
+  setOG("og:description",desc);
+  setOG("og:image",image);
+  setOG("og:url",url);
+  setMeta("twitter:card","summary_large_image");
+  setMeta("twitter:title",title);
+  setMeta("twitter:description",desc);
+  setMeta("twitter:image",image);
+}
+async function shareContent(type,id){
+  const d=await getPublic();
+  const x=d.find(r=>String(r.id)===String(id) && r.type===type);
+  if(!x)return toast("Berita tidak ditemukan");
+  const url=contentUrl(type,id);
+  const title=x.title||"Portal Desa Smart System TPP Kecamatan Nagreg";
+  const text=`${title}\n${getShareDescription(x)}\n${url}`;
+
+  // Jika browser mendukung Web Share, coba kirim foto asli sebagai lampiran.
+  // Ini memberi hasil terbaik di perangkat mobile; link tetap ikut dikirim.
+  if(navigator.share){
+    try{
+      if(x.image_url && navigator.canShare){
+        const resp=await fetch(x.image_url,{mode:"cors"});
+        const blob=await resp.blob();
+        const ext=(blob.type.split("/")[1]||"jpg").replace("jpeg","jpg");
+        const file=new File([blob],`foto-berita-${x.id}.${ext}`,{type:blob.type||"image/jpeg"});
+        if(navigator.canShare({files:[file]})){
+          await navigator.share({title,text,files:[file]});
+          return;
+        }
+      }
+    }catch(e){console.warn("Share foto tidak tersedia:",e)}
+    try{await navigator.share({title,text,url});return}catch(e){}
+  }
+
+  // Fallback WhatsApp: judul + ringkasan + URL.
+  const wa=`https://wa.me/?text=${encodeURIComponent(text)}`;
+  window.open(wa,"_blank","noopener");
+}
+function actions(type,id){
+  return `<div class="meta">
+    <span>👁 ${view(id)}</span>
+    <button class="${localStorage.getItem("liked:"+id)?"liked":""}" onclick="likeBtn('${id}',this)">♡ <span>${local["like:"+id]||0}</span></button>
+    <button onclick="shareContent('${type}','${id}')">📤 Bagikan</button>
+    <button onclick="copyLink('${type}','${id}')">⧉ Salin Link</button>
+  </div>`;
+}
 function likeBtn(id,b){b.classList.toggle("liked",!!localStorage.getItem("liked:"+id));b.querySelector("span").textContent=like(id)}
 async function getPublic(){
   let db=[];
@@ -113,7 +195,28 @@ function render(d){
  $("#media-list").innerHTML=by(d,"sosialisasi").map(x=>`<article class="media-card" id="content-sosialisasi-${x.id}">${photo(x.image_url,x.title)}<h3>${esc(x.title)}</h3><p>${esc(x.summary)}</p>${x.external_url?`<a class="drive" target="_blank" href="${esc(x.external_url)}">Buka media ↗</a>`:""}${actions(x.type,x.id)}</article>`).join("")||'<div class="empty">Belum ada media sosialisasi.</div>';
 }
 const map={berita:"berita",dokumentasi:"dokumentasi",potensi:"potensi",regulasi:"regulasi",template:"template",sosialisasi:"sosialisasi"};
-async function openPanel(type,id){$$(".panel").forEach(p=>p.classList.remove("active"));let p=$("#"+type);if(p)p.classList.add("active");let d=await getPublic();render(d);if(id){let el=$("#content-"+type+"-"+id);if(el){el.scrollIntoView({behavior:"smooth",block:"center"});el.animate([{boxShadow:"0 0 0 4px #d6aa5b"},{boxShadow:"0 0 0 0 transparent"}],900)}}else $(".content").scrollIntoView({behavior:"smooth"})}
+async function openPanel(type,id){
+  $$(".panel").forEach(p=>p.classList.remove("active"));
+  let p=$("#"+type);if(p)p.classList.add("active");
+  let d=await getPublic();render(d);
+  if(id){
+    const selected=d.find(x=>String(x.id)===String(id)&&x.type===type);
+    if(selected)updateSocialMeta(selected,type,id);
+    let el=$("#content-"+type+"-"+id);
+    if(el){
+      el.scrollIntoView({behavior:"smooth",block:"center"});
+      el.animate([{boxShadow:"0 0 0 4px #d6aa5b"},{boxShadow:"0 0 0 0 transparent"}],900);
+    }
+  }else{
+    $(".content").scrollIntoView({behavior:"smooth"});
+    document.title="Portal Desa Smart System TPP Kecamatan Nagreg";
+    setOG("og:type","website");
+    setOG("og:title","Portal Desa Smart System TPP Kecamatan Nagreg");
+    setOG("og:description","Informasi berita desa, dokumentasi kegiatan, produk potensi desa, regulasi, dan layanan administrasi Kecamatan Nagreg.");
+    setOG("og:image","https://pldnagreg.github.io/PORTAL-Desa/og-image.jpg");
+    setOG("og:url","https://pldnagreg.github.io/PORTAL-Desa/");
+  }
+}
 async function route(){let h=decodeURIComponent(location.hash.slice(1));if(h==="admin"){openAdmin();return}if(h==="profil"||h==="beranda"){openPanel(h);return}let [t,id]=h.split("/");if(map[t])openPanel(map[t],id);else if(!h){openPanel("beranda")}}
 $$(".hotspot").forEach(b=>b.onclick=()=>location.hash=b.dataset.target);window.addEventListener("hashchange",route);
 
