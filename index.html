@@ -31,6 +31,22 @@ footer{background:#17100c;color:#d8c29a;border-top:4px solid #78552c}.foot{displ
 .admin{display:none;background:#eee8dc;min-height:100vh;padding:30px 0}.admin.active{display:block}.admin-shell{width:min(1180px,94%);margin:auto}.admin-top{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:20px}.admin h1{margin:0;font-size:28px}.admin-grid{display:grid;grid-template-columns:220px 1fr;gap:18px}.admin-nav,.admin-card,.login-card{background:#fff;border:1px solid #d7c8ae;border-radius:14px;box-shadow:0 8px 22px #49351b12}.admin-nav{padding:10px;height:max-content}.admin-nav button{width:100%;border:0;background:transparent;text-align:left;padding:11px 12px;border-radius:8px;color:#49351f}.admin-nav button.active,.admin-nav button:hover{background:#ead8b4}.admin-card{padding:20px}.toolbar{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:15px}.admin-table{width:100%;border-collapse:collapse;min-width:760px}.admin-table th,.admin-table td{background:#fff;padding:10px;border-bottom:1px solid #eadfce;font-size:12px}.admin-table th{background:#3b2819;color:#f5d899}.admin-actions{display:flex;gap:6px;flex-wrap:wrap}.primary{background:#3f5c36!important;color:#fff!important;border-color:#3f5c36!important}.danger{background:#f6dfdb!important;color:#7b261e!important}.login-wrap{min-height:70vh;display:grid;place-items:center}.login-card{width:min(430px,92%);padding:28px}.field{margin-bottom:13px}.field label{display:block;font-size:11px;font-weight:700;margin-bottom:6px;color:#70552f}.field input,.field textarea,.field select{width:100%;padding:11px 12px;border:1px solid #d4c2a5;border-radius:8px;background:#fffdf8}.field textarea{min-height:130px;resize:vertical}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}.preview{max-width:240px;max-height:150px;border-radius:9px;margin-top:8px;object-fit:cover}.modal{display:none;position:fixed;inset:0;background:#0008;z-index:500;align-items:center;justify-content:center;padding:15px}.modal.open{display:flex}.modal-box{background:#fffaf0;width:min(760px,96%);max-height:92vh;overflow:auto;border-radius:14px;padding:22px}.modal-head{display:flex;justify-content:space-between;align-items:center}.close{border:0;background:#eee1c8;border-radius:50%;width:34px;height:34px}.empty{padding:25px;background:#fffaf0;border:1px solid #d4bd91;border-radius:12px;text-align:center;color:#79654a}
 @media(max-width:900px){.mobilebar{display:flex;justify-content:space-between;padding:11px 5%;background:#1b120d;color:#f1d28f;position:sticky;top:0;z-index:100}.mobilebar span{font-size:9px}.hero img{width:100%}.cards,.news-list,.template-list,.foot{grid-template-columns:1fr}.profile{flex-direction:column}.admin-grid{grid-template-columns:1fr}.admin-nav{display:flex;overflow:auto;gap:4px}.admin-nav button{white-space:nowrap;width:auto}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}}
 @media(max-width:600px){.welcome{padding:28px 15px}.welcome h1{font-size:24px}.welcome p{font-size:11px}.heading h2{font-size:20px}.cards article,.news-card,.template-card,.media-card{padding:15px}.meta button{min-height:34px;font-size:10px}.admin{padding:18px 0}.admin h1{font-size:22px}.admin-card{padding:14px}}
+
+/* ===== MEDIA SOSIAL PORTAL DESA - TAMBAHAN, TIDAK MENGUBAH BAGIAN LAIN ===== */
+.social-portal{padding:28px 20px 34px;background:linear-gradient(180deg,#f4e8cf 0%,#ead9b8 100%);border-top:1px solid #c9aa72;border-bottom:1px solid #a9844b;box-shadow:inset 0 1px 0 #fff6df}
+.social-portal-inner{width:min(980px,94%);margin:auto;text-align:center}
+.social-portal-title{font-family:Cinzel,serif;color:#6f5128;font-size:12px;letter-spacing:3px;font-weight:700;margin-bottom:18px}
+.social-portal-links{display:flex;justify-content:center;align-items:center;gap:22px;flex-wrap:wrap}
+.social-portal-link{width:116px;min-height:112px;padding:10px 8px 9px;text-decoration:none;color:#6b4d27;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;border:1px solid #a47b3c;border-radius:16px;background:linear-gradient(145deg,#3a2719,#1f140d);box-shadow:inset 0 0 0 2px #6f5128,inset 0 0 0 4px #2a1b11,0 5px 12px #5c421f55;position:relative;transition:.22s ease}
+.social-portal-link:before,.social-portal-link:after{content:"";position:absolute;width:9px;height:9px;border:1px solid #d6aa5b;opacity:.8}
+.social-portal-link:before{top:7px;left:7px;border-right:0;border-bottom:0}
+.social-portal-link:after{right:7px;bottom:7px;border-left:0;border-top:0}
+.social-portal-link:hover{transform:translateY(-4px) scale(1.03);box-shadow:0 8px 20px #4b321c66,0 0 18px #d6aa5b55}
+.social-portal-icon{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#8b6a35,#4b341e 62%,#23170f 100%);border:2px solid #d6aa5b;box-shadow:0 0 0 3px #3b2717,0 0 0 4px #9b753b, inset 0 2px 7px #f7d99555}
+.social-portal-icon svg{width:32px;height:32px;fill:none;stroke:#f1d28f;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.social-portal-icon .fill{fill:#f1d28f;stroke:none}
+.social-portal-name{font-family:Cinzel,serif;font-size:10px;letter-spacing:1.5px;color:#f1d28f;font-weight:700}
+@media(max-width:600px){.social-portal{padding:22px 10px 28px}.social-portal-title{font-size:9px;letter-spacing:2px}.social-portal-links{gap:10px}.social-portal-link{width:82px;min-height:92px;padding:8px 5px}.social-portal-icon{width:48px;height:48px}.social-portal-icon svg{width:26px;height:26px}.social-portal-name{font-size:8px;letter-spacing:1px}}
 </style>
 </head>
 <body>
@@ -49,6 +65,26 @@ footer{background:#17100c;color:#d8c29a;border-top:4px solid #78552c}.foot{displ
 </nav>
 </section>
 <section class="welcome"><div class="wrap"><small>KECAMATAN NAGREG • KABUPATEN BANDUNG • JAWA BARAT</small><h1>Portal Desa Smart System TPP</h1><p>Pusat informasi, dokumentasi, regulasi, template administrasi, potensi desa dan media sosialisasi TPP Kecamatan Nagreg.</p></div></section>
+<section class="social-portal" aria-label="Media sosial Portal Desa">
+  <div class="social-portal-inner">
+    <div class="social-portal-title">IKUTI MEDIA SOSIAL PORTAL DESA</div>
+    <div class="social-portal-links">
+      <!-- GANTI URL DI href SETELAH ANDA MEMBERIKAN ALAMAT AKUN -->
+      <a class="social-portal-link" href="https://www.tiktok.com/@portal_pld?_r=1&_t=ZS-991sLOsUQCL" target="_blank" rel="noopener noreferrer" aria-label="TikTok Portal Desa">
+        <span class="social-portal-icon"><svg viewBox="0 0 24 24"><path d="M14 4v10.1a4.1 4.1 0 1 1-3.2-4"/><path d="M14 4c.5 2.4 2 3.9 4.4 4.3"/></svg></span><span class="social-portal-name">TIKTOK</span>
+      </a>
+      <a class="social-portal-link" href="https://www.facebook.com/share/17z8bcop6D/" target="_blank" rel="noopener noreferrer" aria-label="Facebook Portal Desa">
+        <span class="social-portal-icon"><svg viewBox="0 0 24 24"><path class="fill" d="M13.5 21v-7h2.4l.4-2.8h-2.8V9.4c0-.8.2-1.4 1.4-1.4h1.5V5.5c-.3 0-1.1-.1-2.1-.1-2.1 0-3.5 1.3-3.5 3.6v2.2H8.5V14h2.3v7h2.7Z"/></svg></span><span class="social-portal-name">FACEBOOK</span>
+      </a>
+      <a class="social-portal-link" href="https://www.instagram.com/adangmochtar320426?igsh=ZTN0MHd4Z2NreXkw&igsi=ZTN0MHd4Z2NreXkw" target="_blank" rel="noopener noreferrer" aria-label="Instagram Portal Desa">
+        <span class="social-portal-icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="12" cy="12" r="3.6"/><circle class="fill" cx="17.3" cy="6.8" r="1.1"/></svg></span><span class="social-portal-name">INSTAGRAM</span>
+      </a>
+      <a class="social-portal-link" href="https://www.youtube.com/@DimensiNusantaraID" target="_blank" rel="noopener noreferrer" aria-label="YouTube Portal Desa">
+        <span class="social-portal-icon"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="4"/><path class="fill" d="M10 9l6 3-6 3V9Z"/></svg></span><span class="social-portal-name">YOUTUBE</span>
+      </a>
+    </div>
+  </div>
+</section>
 <section class="content"><div class="wrap">
 <section id="beranda" class="panel active"><div class="heading"><span>01</span><div><small>BERANDA UTAMA</small><h2>Portal Informasi Desa</h2></div></div><div class="cards"><article><b>Informasi TPP</b><p>Kegiatan pendampingan, fasilitasi dan dokumentasi pembangunan desa.</p></article><article><b>Dokumen Desa</b><p>Regulasi dan template administrasi untuk mendukung tata kelola desa.</p></article><article><b>Potensi Desa</b><p>Publikasi potensi dan produk unggulan masyarakat desa.</p></article></div><div class="profile-link" onclick="location.hash='profil'"><b>PROFIL TPP KECAMATAN NAGREG</b><br><small>Kenali peran dan ruang lingkup pendampingan desa →</small></div></section>
 <section id="dokumentasi" class="panel"><div class="heading"><span>02</span><div><small>DOKUMENTASI</small><h2>Foto & Dokumentasi Kegiatan</h2></div></div><p style="margin:-10px 0 22px;color:#735c3b;font-size:13px">Dokumentasi dari template Excel telah dimuat. Foto menggunakan pratinjau file Google Drive dan dapat dibuka melalui tombol dokumentasi.</p><div id="dokumentasi-list" class="cards"></div></section>
